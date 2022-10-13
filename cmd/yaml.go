@@ -19,7 +19,7 @@ var yamlCmd = &cobra.Command{
 	Run:   yamlExec,
 }
 
-func yamlExec(_ *cobra.Command, args []string) {
+func yamlExec(_ *cobra.Command, _ []string) {
 	input, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		log.Error().Err(err).Msg("unable to read from stdin")
