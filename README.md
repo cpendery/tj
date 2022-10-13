@@ -5,4 +5,9 @@
 
 ## The universal converter to JSON
 
-tj is a lightweight command-line processor for converting configurations into JSON.
+tj is a lightweight command-line processor for converting configurations into JSON. It can convert _from_
+
+- `csv` ([CSV](https://www.rfc-editor.org/rfc/rfc4180) Table)
+- `toml` ([TOML](https://toml.io/en/v1.0.0)
+- `xml` ([XML](https://www.rfc-editor.org/rfc/rfc5364))
+- `yaml` ([YAML](https://yaml.org/spec/1.2.2/))
