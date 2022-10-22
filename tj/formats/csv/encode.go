@@ -8,7 +8,9 @@ import (
 	"io"
 )
 
-func Encode(blob []byte) ([]byte, error) {
+type CsvFormatter struct{}
+
+func (CsvFormatter) Encode(blob []byte) ([]byte, error) {
 	reader := csv.NewReader(bytes.NewReader(blob))
 	rows := [][]string{}
 	for {

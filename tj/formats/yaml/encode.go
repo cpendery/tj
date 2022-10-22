@@ -7,7 +7,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func Encode(blob []byte) ([]byte, error) {
+type YamlFormatter struct{}
+
+func (YamlFormatter) Encode(blob []byte) ([]byte, error) {
 	var i interface{}
 	if err := yaml.Unmarshal(blob, &i); err != nil {
 		return nil, fmt.Errorf("unable to parse yaml")

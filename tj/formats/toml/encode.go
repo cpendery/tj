@@ -7,7 +7,9 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-func Encode(blob []byte) ([]byte, error) {
+type TomlFormatter struct{}
+
+func (TomlFormatter) Encode(blob []byte) ([]byte, error) {
 	var i interface{}
 	if err := toml.Unmarshal(blob, &i); err != nil {
 		return nil, fmt.Errorf("unable to parse toml")
