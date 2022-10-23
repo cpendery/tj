@@ -20,7 +20,7 @@ tj is a lightweight command-line processor for converting configurations into JS
 
 ## Installation
 
-### Go Compilation
+### go install
 
 #### Go >= 1.17
 
