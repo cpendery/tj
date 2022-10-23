@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"io"
+	"math"
 	"os"
-	"sync"
 
-	"github.com/cpendery/tj/tj/formats"
+	"github.com/cpendery/tj/tj/processor"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -27,72 +27,34 @@ complete documentation is available at https://github.com/cpendery/tj`,
 		SilenceErrors: true,
 		RunE:          rootExec,
 	}
-	inputIsStrings *bool
+	flagStrings *bool
+	verbosity   *int
 )
 
 func init() {
-	inputIsStrings = rootCmd.PersistentFlags().BoolP("strings", "s", false, "toggles tj to process the input as strings rather than files")
+	flagStrings = rootCmd.PersistentFlags().BoolP("strings", "s", false, "toggles tj to process the input as strings rather than files")
+	verbosity = rootCmd.PersistentFlags().CountP("verbose", "v", "increase verbosity (-v = error, -vv = info)")
 }
 
 func rootExec(_ *cobra.Command, args []string) error {
+	logLevel := zerolog.Level(math.Max(float64(int(zerolog.FatalLevel)-*verbosity), 0))
+	zerolog.SetGlobalLevel(logLevel)
+
 	stat, _ := os.Stdin.Stat()
-	var blobs [][]byte
-
 	stdinIsFromPipe := (stat.Mode() & os.ModeCharDevice) == 0
-	if stdinIsFromPipe {
-		blob, err := io.ReadAll(os.Stdin)
-		if err != nil {
-			return err
-		}
-		blobs = append(blobs, blob)
-	} else {
-		for _, arg := range args {
-			if *inputIsStrings {
-				blobs = append(blobs, []byte(arg))
-			} else {
-				f, err := os.Open(arg)
-				defer f.Close()
-				if err != nil {
-					return err
-				}
-				blob, err := io.ReadAll(f)
-				if err != nil {
-					return err
-				}
-				blobs = append(blobs, blob)
-			}
-		}
+	blobs, err := processor.LoadBlobs(stdinIsFromPipe, *flagStrings, args)
+	if err != nil {
+		msg := "failed to load user input"
+		log.Error().Err(err).Msg(msg)
+		return fmt.Errorf(msg)
 	}
 
-	errChan := make(chan error, len(blobs))
-	resChan := make(chan []byte, len(blobs))
-	wg := sync.WaitGroup{}
-	wg.Add(len(blobs))
-
-	for _, b := range blobs {
-		blob := b
-		go func() {
-			defer wg.Done()
-			result, err := formats.RunAllFormatters(blob)
-			if err != nil {
-				errChan <- err
-				return
-			}
-			resChan <- result
-		}()
+	err = processor.Run(blobs)
+	if err != nil {
+		msg := "failed to run formatters on user input"
+		log.Error().Err(err).Msg(msg)
+		return fmt.Errorf(msg)
 	}
-
-	wg.Wait()
-
-	for i := len(errChan); i > 0; i-- {
-		err := <-errChan
-		return err
-	}
-	for i := len(resChan); i > 0; i-- {
-		result := <-resChan
-		fmt.Fprintf(os.Stdout, "%s\n", string(result))
-	}
-
 	return nil
 }
 
