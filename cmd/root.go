@@ -61,6 +61,7 @@ func rootExec(_ *cobra.Command, args []string) error {
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		log.Error().Err(err).Msg("unable to execute root command")
-		os.Exit(1)
+		os.Exit(1) // skipcq: RVV-A0003
+
 	}
 }
