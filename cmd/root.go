@@ -23,9 +23,8 @@ and producing the results on standard output. When reading from stdin,
 input will be treated as a single string.
 
 complete documentation is available at https://github.com/cpendery/tj`,
-		SilenceUsage:  true,
-		SilenceErrors: true,
-		RunE:          rootExec,
+		SilenceUsage: true,
+		RunE:         rootExec,
 	}
 	flagStrings *bool
 	verbosity   *int
@@ -36,13 +35,18 @@ func init() {
 	verbosity = rootCmd.PersistentFlags().CountP("verbose", "v", "increase verbosity (-v = error, -vv = info)")
 }
 
-func rootExec(_ *cobra.Command, args []string) error {
+func rootExec(cmd *cobra.Command, args []string) error {
 	logLevel := zerolog.Level(math.Max(float64(int(zerolog.FatalLevel)-*verbosity), 0))
 	zerolog.SetGlobalLevel(logLevel)
 
 	stat, _ := os.Stdin.Stat()
 	stdinIsFromPipe := (stat.Mode() & os.ModeCharDevice) == 0
 	blobs, err := processor.LoadBlobs(stdinIsFromPipe, *flagStrings, args)
+
+	if len(blobs) == 0 {
+		return cmd.Help()
+	}
+
 	if err != nil {
 		msg := "failed to load user input"
 		log.Error().Err(err).Msg(msg)
@@ -62,6 +66,5 @@ func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		log.Error().Err(err).Msg("unable to execute root command")
 		os.Exit(1) // skipcq: RVV-A0003
-
 	}
 }
