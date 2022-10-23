@@ -17,3 +17,18 @@ tj is a lightweight command-line processor for converting configurations into JS
 <div align="center">
   <img alt="TJ demo" src="https://user-images.githubusercontent.com/35637443/197414349-936404b4-b443-4027-ab24-398a754f38af.gif">
 </div>
+
+## Installation
+
+### Go Compilation
+
+#### Go >= 1.17
+
+```bash
+go install github.com/cpendery/tj@latest
+```
+#### Go < 1.17
+
+```bash
+go get github.com/cpendery/tj
+```
