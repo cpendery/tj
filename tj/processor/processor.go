@@ -37,10 +37,13 @@ func LoadBlobs(stdinIsFromPipe, inputIsStrings bool, args []string) ([][]byte, e
 				if err != nil {
 					return nil, fmt.Errorf("unable to open %s: %w", arg, err)
 				}
-				defer f.Close()
 				blob, err := io.ReadAll(f)
 				if err != nil {
 					return nil, fmt.Errorf("unable to read all bytes from %s: %w", arg, err)
+				}
+				err = f.Close()
+				if err != nil {
+					return nil, fmt.Errorf("unable to close %s: %w", arg, err)
 				}
 				blobs = append(blobs, blob)
 			}
